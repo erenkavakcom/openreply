@@ -3,7 +3,7 @@ import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { execute, query } from "@/lib/db";
 import { notifyPhone } from "@/lib/notify";
 
-// Instagram auto-DM (what ManyChat's "comment a word, get the link in DM" does): Meta calls our webhook for every
+// Instagram auto-DM (the "comment a word, get the link in DM" feature of tools like ManyChat): Meta calls our webhook for every
 // new comment; a comment containing a rule's keyword gets a private reply (a DM tied to that comment) and,
 // optionally, a short public answer under the comment. Uses the Instagram API with Instagram Login.
 

@@ -1,7 +1,7 @@
 # OpenReply
 
 **Instagram'da gönderine belirli bir kelimeyle yorum yapan herkese otomatik DM gönderen, ücretsiz ve açık kaynak sistem.**
-ManyChat'in "yoruma LİNK yaz, DM'den göndereyim" özelliğinin, kendi hesabında aylık ücret ödemeden çalışan hali.
+ManyChat gibi araçlardaki "yoruma LİNK yaz, DM'den göndereyim" özelliğinin, kendi hesabında aylık ücret ödemeden çalışan açık kaynak hali.
 
 [![Vercel'e kur](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ferenkavakcom%2Fopenreply&project-name=openreply&repository-name=openreply&env=ADMIN_PASSWORD,CRON_SECRET&envDescription=ADMIN_PASSWORD%3A%20panel%20%C5%9Fifren%20(en%20az%2010%20karakter).%20CRON_SECRET%3A%20rastgele%20uzun%20bir%20kelime.&envLink=https%3A%2F%2Fgithub.com%2Ferenkavakcom%2Fopenreply%23kurulum)
 
@@ -136,6 +136,8 @@ bir kez çalıştırır; ama her yeni yorum ve paneli her açışın da sırayı
 ## Lisans
 
 [MIT](LICENSE). Ücretsiz kullanabilir, değiştirebilir ve dağıtabilirsin.
+
+OpenReply bağımsız bir projedir; Meta, Instagram ya da ManyChat ile bağlantılı değildir ve onlar tarafından onaylanmamıştır. Instagram ve Meta, Meta Platforms, Inc.'in; ManyChat, ManyChat, Inc.'in ticari markalarıdır.
 
 ---
 

@@ -2,7 +2,7 @@
   "name": "openreply",
   "version": "1.0.0",
   "private": true,
-  "description": "Instagram'da anahtar kelimeyle yorum yapanlara otomatik DM gönderen ücretsiz, açık kaynak sistem (ManyChat alternatifi). erenkavak.com",
+  "description": "Instagram'da anahtar kelimeyle yorum yapanlara otomatik DM gönderen ücretsiz, açık kaynak sistem (ManyChat gibi araçlardaki yorum → DM özelliğinin ücretsiz alternatifi). erenkavak.com",
   "license": "MIT",
   "author": "Eren Kavak (https://erenkavak.com)",
   "scripts": {
