@@ -1,5 +1,5 @@
 {
-  "name": "instagram-yorum-dm",
+  "name": "openreply",
   "version": "1.0.0",
   "private": true,
   "description": "Instagram'da anahtar kelimeyle yorum yapanlara otomatik DM gönderen ücretsiz, açık kaynak sistem (ManyChat alternatifi). erenkavak.com",

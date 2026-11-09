@@ -4,7 +4,7 @@ export const credit = {
   name: "Eren Kavak",
   site: "https://erenkavak.com",
   siteLabel: "erenkavak.com",
-  repo: "https://github.com/erenkavakcom/instagram-yorum-dm",
+  repo: "https://github.com/erenkavakcom/openreply",
   socials: [
     { label: "Instagram", handle: "@erenkavakcom", href: "https://www.instagram.com/erenkavakcom/" },
     { label: "YouTube", handle: "@erenkavakcom", href: "https://www.youtube.com/@erenkavakcom" },

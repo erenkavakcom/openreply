@@ -7,8 +7,8 @@ const jost = Jost({ subsets: ["latin", "latin-ext"], variable: "--font-jost" });
 const nunito = Nunito({ subsets: ["latin", "latin-ext"], weight: ["700", "800", "900"], variable: "--font-nunito" });
 
 export const metadata: Metadata = {
-  title: { default: "Yorum → DM", template: "%s · Yorum → DM" },
-  description: "Instagram'da anahtar kelimeyle yorum yapanlara otomatik DM. Ücretsiz ve açık kaynak, erenkavak.com",
+  title: { default: "OpenReply", template: "%s · OpenReply" },
+  description: "OpenReply: Instagram'da anahtar kelimeyle yorum yapanlara otomatik DM. Ücretsiz ve açık kaynak, erenkavak.com",
   robots: { index: false, follow: false },
 };
 

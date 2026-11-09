@@ -1,9 +1,9 @@
-# Yorum → DM
+# OpenReply
 
 **Instagram'da gönderine belirli bir kelimeyle yorum yapan herkese otomatik DM gönderen, ücretsiz ve açık kaynak sistem.**
 ManyChat'in "yoruma LİNK yaz, DM'den göndereyim" özelliğinin, kendi hesabında aylık ücret ödemeden çalışan hali.
 
-[![Vercel'e kur](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ferenkavakcom%2Finstagram-yorum-dm&project-name=instagram-yorum-dm&repository-name=instagram-yorum-dm&env=ADMIN_PASSWORD,CRON_SECRET&envDescription=ADMIN_PASSWORD%3A%20panel%20%C5%9Fifren%20(en%20az%2010%20karakter).%20CRON_SECRET%3A%20rastgele%20uzun%20bir%20kelime.&envLink=https%3A%2F%2Fgithub.com%2Ferenkavakcom%2Finstagram-yorum-dm%23kurulum)
+[![Vercel'e kur](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ferenkavakcom%2Fopenreply&project-name=openreply&repository-name=openreply&env=ADMIN_PASSWORD,CRON_SECRET&envDescription=ADMIN_PASSWORD%3A%20panel%20%C5%9Fifren%20(en%20az%2010%20karakter).%20CRON_SECRET%3A%20rastgele%20uzun%20bir%20kelime.&envLink=https%3A%2F%2Fgithub.com%2Ferenkavakcom%2Fopenreply%23kurulum)
 
 > [erenkavak.com](https://erenkavak.com) tarafından yapıldı. Destek olmak istersen
 > [Instagram](https://www.instagram.com/erenkavakcom/), [YouTube](https://www.youtube.com/@erenkavakcom) ve
@@ -24,21 +24,39 @@ Kendi hesabın için kullandığın sürece Meta incelemesine (App Review) gerek
 
 ## Kurulum
 
-Toplam yaklaşık 15-20 dakika. İki bölümü var: siteyi kurmak (5 dk) ve Meta'yı bağlamak (10-15 dk).
+İki yol var. İkisi de ücretsiz hesaplarla çalışır ve yaklaşık 15-20 dakika sürer.
 
-### 1. Siteyi kur (Vercel, ücretsiz)
+- **Yol 1: Kendin kur.** Aşağıdaki adımları sırayla izlersin.
+- **Yol 2: Claude Code ile kur.** Claude, tarayıcında tıklamaları senin yerine yapar; sen sadece giriş yaparsın ve onay verirsin.
 
-1. Yukarıdaki **Vercel'e kur** butonuna bas, GitHub hesabınla giriş yap.
-2. İki değer sorulacak:
-   - `ADMIN_PASSWORD`: panelin şifresi. En az 10 karakter, tahmin edilmesi zor bir şey.
+### Yol 1: Kendin kur
+
+#### 1.1 Hesapları aç (bir kerelik)
+
+1. **GitHub**: [github.com/signup](https://github.com/signup) adresinden ücretsiz hesap aç. Vercel bu hesapla giriş yapacak ve
+   projenin bir kopyasını senin hesabında tutacak.
+2. **Vercel**: [vercel.com/signup](https://vercel.com/signup) → **Hobby** (ücretsiz) → **Continue with GitHub**. GitHub'ın izin
+   ekranında **Authorize Vercel**'e bas.
+
+#### 1.2 Siteyi Vercel'e kur
+
+1. Bu sayfanın başındaki **Vercel'e kur** (Deploy) butonuna bas.
+2. **Create Git Repository** ekranında depo adını olduğu gibi bırakabilirsin; **Private** seçili kalsın → **Create**.
+3. İki değer sorulacak:
+   - `ADMIN_PASSWORD`: panelin şifresi. En az 10 karakter, tahmin edilmesi zor bir şey. Bir yere not et.
    - `CRON_SECRET`: rastgele uzun bir kelime (örn. `k8Fq2mZ7xLw9Pn4R`). Sıradaki DM'leri gönderen zamanlayıcı için.
-3. **Deploy**'a bas. Kurulum 1-2 dakika sürer.
-4. Veritabanını ekle: Vercel'de projene gir → **Storage** → **Create Database** → **Neon** (ücretsiz plan) → **Connect**.
-   Bu, `DATABASE_URL`'i kendiliğinden ekler.
-5. **Deployments** sekmesinde son kurulumun yanındaki **⋯ → Redeploy** ile bir kez yeniden kur.
-6. Sitenin adresini aç (örn. `https://instagram-yorum-dm-xxxx.vercel.app`), şifrenle giriş yap.
+4. **Deploy**'a bas. 1-2 dakika sonra "Congratulations" ekranı gelir. Site açılır ama veritabanı olmadığı için henüz
+   giriş ekranında "DATABASE_URL" eksik der; bu normal.
+5. **Veritabanını bağla**: Vercel'de projene gir → üstte **Storage** → **Create Database** → **Neon** → **Continue** →
+   bölge olarak **Frankfurt** (Türkiye'ye yakın) → plan **Free** → **Create** → çıkan ekranda **Connect**.
+   Bu, `DATABASE_URL`'i projeye kendiliğinden ekler.
+6. **Yeniden kur**: **Deployments** sekmesi → en üstteki kurulumun sağındaki **⋯** → **Redeploy** → **Redeploy**.
+7. **Sitenin adresini** projenin **Overview** sayfasındaki **Domains** altında görürsün
+   (örn. `openreply-xxxx.vercel.app`). Aç ve `ADMIN_PASSWORD` ile giriş yap.
 
-### 2. Meta'yı bağla
+İleride bu depoda güncelleme çıkarsa: GitHub'daki kopyanı açıp **Sync fork** ya da bu repodan yeniden kurabilirsin.
+
+#### 1.3 Meta'yı bağla
 
 Panelde **Kurulum rehberi** sekmesi seni adım adım götürür. Kopyalaman gereken değerler (webhook adresi, doğrulama kodu,
 gizlilik sayfası) orada hazır, yapıştırman gerekenler (token, gizli anahtar) için alanlar da aynı adımlarda. Özetle:
@@ -53,14 +71,39 @@ gizlilik sayfası) orada hazır, yapıştırman gerekenler (token, gizli anahtar
 5. *Uygulama ayarları → Temel*: gizlilik ve veri silme adreslerini (panelde hazır) yapıştır → uygulamayı **Live** moda al.
 6. Panelde kural ekle, **başka bir hesaptan** yorum yazıp dene.
 
+### Yol 2: Claude Code ile kur
+
+[Claude Code](https://claude.com/claude-code), bilgisayarında çalışan bir yapay zeka asistanı. **Claude in Chrome** eklentisiyle
+Chrome'unu kullanıp Vercel ve Meta panellerindeki tıklamaları senin yerine yapabilir. Claude aboneliği gerekir.
+
+1. **Claude Code'u kur**: [claude.com/claude-code](https://claude.com/claude-code) adresinden masaüstü uygulamasını indir ve
+   Claude hesabınla giriş yap.
+2. **Claude in Chrome'u bağla**: Chrome Web Mağazası'ndan **Claude** eklentisini kur, aynı Claude hesabıyla giriş yap.
+   Claude Code bu Chrome'u görür ve kullanabilir.
+3. Chrome'da **GitHub**, **Vercel** ve **Facebook** hesaplarına kendin giriş yap. Claude şifre girmez; giriş gereken yerde durur ve
+   senden ister.
+4. Claude Code'a şu mesajı yapıştır:
+
+```text
+https://github.com/erenkavakcom/openreply deposunu Instagram hesabım için kur.
+README'deki "Yol 1" adımlarını Chrome'da benim yerime yap:
+1) Vercel'e Deploy butonuyla kur. ADMIN_PASSWORD'ü ben yazacağım, sorulduğunda dur ve bana sor; CRON_SECRET için rastgele bir değer üret.
+2) Storage'dan ücretsiz Neon veritabanını (Frankfurt) bağla ve yeniden kur.
+3) Site açılınca panele girmemi bekle, sonra paneldeki "Kurulum rehberi" adımlarını developers.facebook.com'da birlikte yapalım.
+Giriş, şifre ya da onay gereken her yerde dur ve bana söyle. Her adımı bitirince ne yaptığını kısaca yaz.
+```
+
+5. Claude adım adım ilerler; senden istediği yerlerde (giriş, şifre, Meta'nın izin ekranları) işlemi sen yaparsın.
+6. Bitince panelde kural ekleyip başka bir hesaptan yorum yazarak dene.
+
 ## Başka bir sunucuda çalıştırmak
 
 Node.js 20.9+ olan her yerde çalışır (Hostinger, bir VPS, kendi bilgisayarın). Bir Postgres veritabanı gerekir
 (Neon, Supabase gibi ücretsiz servisler olur).
 
 ```bash
-git clone https://github.com/erenkavakcom/instagram-yorum-dm.git
-cd instagram-yorum-dm
+git clone https://github.com/erenkavakcom/openreply.git
+cd openreply
 npm install
 cp .env.example .env   # DATABASE_URL ve ADMIN_PASSWORD'ü doldur
 npm run build

@@ -1,8 +1,8 @@
-/** The app's name as a small mark: comment bubble → message. */
+/** The app's name: OpenReply, "Reply" in the brand orange. */
 export function Brand() {
   return (
     <span className="font-display text-lg font-black tracking-tight">
-      Yorum <span className="text-brand">→</span> DM
+      Open<span className="text-brand">Reply</span>
     </span>
   );
 }
