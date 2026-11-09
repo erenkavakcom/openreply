@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/* erenkavak.com colours: deep navy, orange accent, soft mist text. */
+:root {
+  --navy: #071030;
+  --navy-1: #0d1740;
+  --navy-2: #131f52;
+  --brand: #d62a0d;
+  --brand-hover: #f0451f;
+  --mist: #aab0c8;
+}
+
+@theme inline {
+  --color-navy: var(--navy);
+  --color-navy-1: var(--navy-1);
+  --color-navy-2: var(--navy-2);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-mist: var(--mist);
+  --font-sans: var(--font-jost);
+  --font-display: var(--font-nunito);
+}
+
+html {
+  color-scheme: dark;
+  background: var(--navy);
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 85% -10%, rgb(214 42 13 / 0.16), transparent 60%),
+    var(--navy);
+  color: #fff;
+  min-height: 100dvh;
+}
+
+::selection {
+  background: var(--brand);
+  color: #fff;
+}
+
+a {
+  text-underline-offset: 3px;
+}
