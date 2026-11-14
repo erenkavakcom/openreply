@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BookOpen, Check, Copy, ListChecks, LogOut, MessageCircle, Pencil, Plus, Send, Trash2 } from "lucide-react";
 import { disconnectIg, flushQueue, logout, removeIgRule, saveIgConnection, saveIgRule } from "@/app/actions";
@@ -21,6 +22,7 @@ export type Rule = {
   id: number;
   keywords: string;
   media_id: string;
+  media_url: string;
   dm_text: string;
   reply_text: string;
   active: boolean;
@@ -34,6 +36,9 @@ type Draft = { id?: number; keywords: string; mediaId: string; dmText: string; r
 type Tab = "rehber" | "kurallar" | "gonderimler";
 
 const EMPTY: Draft = { keywords: "", mediaId: "", dmText: "", replyText: "", active: true, followGate: false, gateText: "" };
+/** "instagram.com/reel/Dabc…/" → "reel/Dabc…", short enough for the rule's line */
+const shortLink = (url: string) => url.replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/\/+$/, "");
+const logHref = (page: number) => (page > 1 ? `/?sayfa=${page}` : "/");
 const when = (iso: string) => new Date(iso).toLocaleString("tr-TR", { dateStyle: "short", timeStyle: "short" });
 
 const STATUS: Record<string, { label: string; cls: string }> = {
@@ -95,12 +100,15 @@ export function Panel({
   connection,
   rules,
   events,
+  log,
   stats,
   defaultGateText,
 }: {
   connection: Connection;
   rules: Rule[];
+  /** one page of the log (ten rows), newest first */
   events: Event[];
+  log: { page: number; pages: number; total: number };
   stats: Stats;
   defaultGateText: string;
 }) {
@@ -112,7 +120,7 @@ export function Panel({
   const [accountId, setAccountId] = useState("");
   const [draft, setDraft] = useState<Draft | null>(null);
   const ready = connection.connected && connection.hasSecret;
-  const [tab, setTab] = useState<Tab>(ready ? "kurallar" : "rehber");
+  const [tab, setTab] = useState<Tab>(log.page > 1 ? "gonderimler" : ready ? "kurallar" : "rehber");
 
   const run = (fn: () => Promise<{ ok: boolean; message: string }>, after?: () => void) =>
     start(async () => {
@@ -367,9 +375,18 @@ export function Panel({
                 <input value={draft.replyText} onChange={(e) => setDraft({ ...draft, replyText: e.target.value })} className={input} placeholder="DM'ine gönderdim 🙌 | Mesajlarına bak 📩" />
               </label>
               <label>
-                <span className={label}>Sadece bu gönderi (isteğe bağlı)</span>
-                <span className={hint}>Gönderi kimliği. Boşsa tüm gönderilerde çalışır.</span>
-                <input value={draft.mediaId} onChange={(e) => setDraft({ ...draft, mediaId: e.target.value })} className={`${input} font-mono`} inputMode="numeric" />
+                <span className={label}>Video linki (isteğe bağlı)</span>
+                <span className={hint}>
+                  Instagram&apos;daki videonun linkini yapıştır; kural sadece o videonun yorumlarında çalışır. Boşsa tüm gönderilerde çalışır. Aynı kelimeyle
+                  linksiz bir kural da varsa, bu videoda linkli olan gider.
+                </span>
+                <input
+                  value={draft.mediaId}
+                  onChange={(e) => setDraft({ ...draft, mediaId: e.target.value })}
+                  className={`${input} font-mono text-[13px]`}
+                  inputMode="url"
+                  placeholder="https://www.instagram.com/reel/…"
+                />
               </label>
               <div className="rounded-xl bg-navy-1 p-3.5 ring-1 ring-white/8">
                 <label className="flex items-start gap-2 text-sm">
@@ -422,7 +439,19 @@ export function Panel({
                       </div>
                       <p className="mt-2 whitespace-pre-line break-words text-sm">{r.dm_text}</p>
                       <p className="mt-2 text-xs text-mist">
-                        {r.media_id ? `Gönderi ${r.media_id}` : "Tüm gönderiler"} · {r.sent_count} DM gönderildi
+                        {r.media_url ? (
+                          <>
+                            Sadece{" "}
+                            <a href={r.media_url} target="_blank" rel="noopener noreferrer" className="font-mono underline underline-offset-2 hover:text-white">
+                              {shortLink(r.media_url)}
+                            </a>
+                          </>
+                        ) : r.media_id ? (
+                          `Sadece gönderi ${r.media_id}`
+                        ) : (
+                          "Tüm gönderiler"
+                        )}{" "}
+                        · {r.sent_count} DM gönderildi
                         {r.follow_gate ? " · sadece takip edenlere" : ""}
                         {r.active ? "" : " · kapalı"}
                       </p>
@@ -436,7 +465,7 @@ export function Panel({
                           setDraft({
                             id: r.id,
                             keywords: r.keywords,
-                            mediaId: r.media_id,
+                            mediaId: r.media_url || r.media_id,
                             dmText: r.dm_text,
                             replyText: r.reply_text,
                             active: r.active,
@@ -468,7 +497,9 @@ export function Panel({
       {tab === "gonderimler" && (
         <section className={`${card} mt-6`}>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-display text-xl font-extrabold">Son gönderimler</h2>
+            <h2 className="font-display text-xl font-extrabold">
+              Son gönderimler {log.total > 0 && <span className="ml-1 text-xs font-normal text-mist tabular-nums">{log.total} kayıt</span>}
+            </h2>
             {stats.queued > 0 && (
               <button type="button" disabled={pending} className={btnGhost} onClick={() => run(flushQueue)}>
                 <Send className="size-4" /> Sırayı şimdi gönder
@@ -494,6 +525,23 @@ export function Panel({
                 </li>
               ))}
             </ul>
+          )}
+          {log.pages > 1 && (
+            <nav aria-label="Günlük sayfaları" className="mt-4 flex items-center justify-center gap-3 text-sm">
+              {log.page > 1 && (
+                <Link href={logHref(log.page - 1)} scroll={false} className={btnGhost}>
+                  Önceki
+                </Link>
+              )}
+              <span className="text-mist tabular-nums">
+                {log.page} / {log.pages}
+              </span>
+              {log.page < log.pages && (
+                <Link href={logHref(log.page + 1)} scroll={false} className={btnGhost}>
+                  Sonraki
+                </Link>
+              )}
+            </nav>
           )}
         </section>
       )}

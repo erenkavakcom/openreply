@@ -1,8 +1,8 @@
 "use server";
 
 import { requireOwner, signIn, signOut } from "@/lib/auth";
-import { execute } from "@/lib/db";
-import { cleanToken, processQueue, readIg, whoAmI, writeIg } from "@/lib/instagram";
+import { execute, query } from "@/lib/db";
+import { cleanToken, findMedia, processQueue, readIg, whoAmI, writeIg } from "@/lib/instagram";
 import { redirect } from "next/navigation";
 
 export type IgState = { ok: boolean; message: string };
@@ -76,19 +76,40 @@ export async function saveIgRule(input: {
   const keywords = str(input.keywords, 300);
   const dmText = str(input.dmText, 1000);
   const replyText = str(input.replyText, 500);
-  const mediaId = str(input.mediaId, 40);
+  const media = str(input.mediaId, 300);
   const gateText = str(input.gateText, 500);
+  const id = input.id ? Math.trunc(Number(input.id)) : 0;
   if (!keywords) return { ok: false, message: "En az bir anahtar kelime yaz." };
   if (!dmText) return { ok: false, message: "DM metnini yaz." };
-  if (mediaId && !/^\d+$/.test(mediaId)) return { ok: false, message: "Gönderi kimliği sadece rakamlardan oluşur. Tüm gönderiler için boş bırak." };
-  const values = [keywords, mediaId, dmText, replyText, input.active ? 1 : 0, input.followGate ? 1 : 0, gateText];
-  if (input.id)
-    await execute("UPDATE ig_rules SET keywords = ?, media_id = ?, dm_text = ?, reply_text = ?, active = ?, follow_gate = ?, gate_text = ? WHERE id = ?", [
-      ...values,
-      Math.trunc(Number(input.id)),
-    ]);
-  else await execute("INSERT INTO ig_rules (keywords, media_id, dm_text, reply_text, active, follow_gate, gate_text) VALUES (?, ?, ?, ?, ?, ?, ?)", values);
-  return { ok: true, message: input.id ? "Kural güncellendi." : "Kural eklendi." };
+
+  // The post the rule is for: empty = every post; a video link is turned into that post's id; a bare id is kept.
+  let mediaId = "";
+  let mediaUrl = "";
+  if (/^\d+$/.test(media)) mediaId = media.slice(0, 40);
+  else if (media) {
+    const [old] = id ? await query<{ media_id: string; media_url: string }>("SELECT media_id, media_url FROM ig_rules WHERE id = ?", [id]) : [];
+    // the same link as before: no need to ask Instagram again
+    if (old?.media_id && old.media_url === media) ({ media_id: mediaId, media_url: mediaUrl } = old);
+    else {
+      try {
+        ({ id: mediaId, url: mediaUrl } = await findMedia(media));
+      } catch (e) {
+        return { ok: false, message: (e as Error).message };
+      }
+      mediaUrl = mediaUrl.slice(0, 300);
+    }
+  }
+
+  const values = [keywords, mediaId, mediaUrl, dmText, replyText, input.active ? 1 : 0, input.followGate ? 1 : 0, gateText];
+  if (id)
+    await execute(
+      "UPDATE ig_rules SET keywords = ?, media_id = ?, media_url = ?, dm_text = ?, reply_text = ?, active = ?, follow_gate = ?, gate_text = ? WHERE id = ?",
+      [...values, id],
+    );
+  else
+    await execute("INSERT INTO ig_rules (keywords, media_id, media_url, dm_text, reply_text, active, follow_gate, gate_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", values);
+  const where = mediaId ? "Sadece seçtiğin videonun yorumlarında çalışır." : "Bütün gönderilerin yorumlarında çalışır.";
+  return { ok: true, message: `${id ? "Kural güncellendi." : "Kural eklendi."} ${where}` };
 }
 
 export async function removeIgRule(id: number): Promise<IgState> {

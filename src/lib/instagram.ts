@@ -32,7 +32,10 @@ export type IgSettings = {
 export type IgRule = {
   id: number;
   keywords: string;
+  /** the one post this rule answers on; empty = every post */
   media_id: string;
+  /** that post's link as shown in the panel; empty when the rule is for every post */
+  media_url: string;
   dm_text: string;
   reply_text: string;
   active: number;
@@ -270,10 +273,14 @@ export function keywordHit(text: string, keyword: string) {
   }
 }
 
-/** The rule a comment triggers, on that post or on every post; see keywordHit for how a keyword matches. */
+/**
+ * The rule a comment triggers; see keywordHit for how a keyword matches. A rule written for that post wins over a
+ * rule for every post, so the same word ("link") can send a different link under each video and a general one
+ * under the rest.
+ */
 export function matchRule(rules: IgRule[], text: string, mediaId: string) {
   const words = normalize(text);
-  return rules.find(
+  const hits = rules.filter(
     (r) =>
       r.active &&
       (!r.media_id || r.media_id === mediaId) &&
@@ -282,6 +289,47 @@ export function matchRule(rules: IgRule[], text: string, mediaId: string) {
         .map(normalize)
         .some((k) => keywordHit(words, k)),
   );
+  return hits.find((r) => r.media_id) ?? hits[0];
+}
+
+/** The code in a post link: instagram.com/reel/<code>/, /reels/<code>/, /p/<code>/ or /tv/<code>/, with or without the account name before it. */
+export const shortcodeOf = (link: string) => /instagram\.com\/(?:[\w.]+\/)?(?:reels?|p|tv)\/([\w-]+)/i.exec(link)?.[1] ?? "";
+
+/** How many of the account's posts findMedia walks through (newest first), in pages of 100. */
+const FIND_MEDIA_PAGES = 20;
+
+/**
+ * The id of the account's post behind a link pasted into a rule. The API has no lookup by link, so the account's
+ * posts are read newest first until one has that link's code.
+ */
+export async function findMedia(link: string): Promise<{ id: string; url: string }> {
+  const code = shortcodeOf(link);
+  if (!code) throw new Error("Bu bir Instagram gönderi linki değil. Reels ya da gönderi linkini yapıştır (instagram.com/reel/…).");
+  const s = await refreshTokenIfDue(await readIg());
+  if (!s.token) throw new Error("Instagram bağlı değil; önce bağlantıyı kur.");
+  const host = s.host ?? guessHost(s.token);
+  const owners = [...new Set([host === "instagram" ? "me" : "", s.userId ? encodeURIComponent(s.userId) : ""].filter(Boolean))];
+  let lastError = "";
+  for (const who of owners) {
+    let after = "";
+    try {
+      for (let page = 0; page < FIND_MEDIA_PAGES; page++) {
+        const res = await graph<{ data?: { id: string; permalink?: string }[]; paging?: { cursors?: { after?: string }; next?: string } }>(
+          `/${who}/media?fields=id,permalink&limit=100${after ? `&after=${encodeURIComponent(after)}` : ""}`,
+          { token: s.token, host },
+        );
+        const hit = res.data?.find((m) => shortcodeOf(m.permalink ?? "") === code);
+        if (hit) return { id: String(hit.id), url: hit.permalink ?? link };
+        after = res.paging?.next ? (res.paging.cursors?.after ?? "") : "";
+        if (!after) break;
+      }
+      throw new Error("Bu link hesabındaki gönderiler arasında bulunamadı. Kendi videonun linki olduğundan emin ol.");
+    } catch (e) {
+      lastError = (e as Error).message;
+      if (!(e instanceof GraphFail)) break;
+    }
+  }
+  throw new Error(lastError || "Gönderi bulunamadı.");
 }
 
 export type CommentChange = {
@@ -622,7 +670,16 @@ export async function handleMessage(accountId: string, m: IncomingMessage) {
 }
 
 export const listRules = () => query<IgRule>("SELECT * FROM ig_rules ORDER BY id DESC");
-export const listEvents = () => query<IgEvent>("SELECT * FROM ig_events ORDER BY id DESC LIMIT 50");
+export const EVENTS_PER_PAGE = 10;
+/** One page of the log, newest first; a page number past the end gives the last page. */
+export async function listEvents(page = 1) {
+  const [count] = await query<{ n: string }>("SELECT COUNT(*) AS n FROM ig_events");
+  const total = Number(count?.n ?? 0);
+  const pages = Math.max(1, Math.ceil(total / EVENTS_PER_PAGE));
+  const at = Math.min(Math.max(1, Math.floor(page) || 1), pages);
+  const rows = await query<IgEvent>("SELECT * FROM ig_events ORDER BY id DESC LIMIT ? OFFSET ?", [EVENTS_PER_PAGE, (at - 1) * EVENTS_PER_PAGE]);
+  return { rows, page: at, pages, total };
+}
 
 /** Last hour's numbers for the panel: DMs and public answers against their caps, and what waits in the queue. */
 export async function hourStats() {

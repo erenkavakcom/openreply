@@ -16,8 +16,8 @@ ManyChat gibi araçlardaki "yoruma LİNK yaz, DM'den göndereyim" özelliğinin,
 - **Yorumun altına otomatik yanıt** ("DM'den gönderdim 🙌"), birkaç seçenek arasından rastgele.
 - **Aynı kişiye tek DM**: üç kez yorum yazan bir kez mesaj alır.
 - **Viral gönderiye hazır**: Meta'nın saatlik sınırına takılmadan saatte 600 DM gönderir, fazlasını sıraya alıp sırayla yollar; hata olursa kendisi tekrar dener.
-- **Gönderi bazında kural**: bir kural tüm gönderilerde ya da yalnızca seçtiğin gönderide çalışır.
-- **Panel**: kurallar, son gönderimler, hata nedenleri, uygulamanın içinde adım adım kurulum rehberi.
+- **Videoya özel kural**: kurala videonun Instagram linkini yapıştırırsın, kural yalnızca o videonun yorumlarında çalışır. Link vermezsen tüm gönderilerde çalışır. Aynı kelimeyi ("link" gibi) her videoda farklı bir mesajla kullanabilirsin: o videoda linkli kural, diğerlerinde linksiz kural gider.
+- **Panel**: kurallar, sayfa sayfa gönderim günlüğü (her sayfada 10 kayıt), hata nedenleri, uygulamanın içinde adım adım kurulum rehberi.
 - İsteğe bağlı **Telegram uyarısı**: token geçersiz olursa ya da gönderimler takılırsa haber verir.
 
 Kendi hesabın için kullandığın sürece Meta incelemesine (App Review) gerek yoktur.
@@ -54,7 +54,7 @@ Kendi hesabın için kullandığın sürece Meta incelemesine (App Review) gerek
 7. **Sitenin adresini** projenin **Overview** sayfasındaki **Domains** altında görürsün
    (örn. `openreply-xxxx.vercel.app`). Aç ve `ADMIN_PASSWORD` ile giriş yap.
 
-İleride bu depoda güncelleme çıkarsa: GitHub'daki kopyanı açıp **Sync fork** ya da bu repodan yeniden kurabilirsin.
+Bu depoda güncelleme çıktığında: GitHub'daki kopyanı açıp **Sync fork**'a bas; Vercel yeni sürümü kendisi yayına alır. Veritabanı ilk açılışta kendini günceller, kuralların ve kayıtların yerinde kalır. Neyin değiştiği aşağıdaki [Sürüm notları](#sürüm-notları) bölümünde.
 
 #### 1.3 Meta'yı bağla
 
@@ -132,6 +132,14 @@ bir kez çalıştırır; ama her yeni yorum ve paneli her açışın da sırayı
 **Token'ın süresi dolarsa?** Token 60 gün geçerli; sistem dolmadan kendisi yeniler. Yenileyemezse panelde ve (kuruluysa) Telegram'da uyarı görürsün.
 
 **Verileri ne kadar saklanıyor?** Yalnızca eşleşen yorumların kısa kaydı, en fazla 90 gün. Ayrıntısı sitendeki `/gizlilik` sayfasında.
+
+## Sürüm notları
+
+**1.1.0 (14 Kasım 2026)**
+
+- Kurala gönderi kimliği yerine **videonun linki** yazılıyor. Kaydederken link hesabındaki gönderilerde aranır; bulunamazsa kural kaydedilmez ve nedenini söyler. Eski, kimlikle yazılmış kurallar çalışmaya devam eder.
+- Aynı kelimeyle hem videoya özel hem genel kural varsa, o videoda **videoya özel olan** gider. Önceden ilk eklenen kural giderdi.
+- Gönderim günlüğü 50 kayıtlık tek liste yerine **10'ar kayıtlık sayfalar** halinde; toplam kayıt sayısı başlıkta yazar.
 
 ## Lisans
 

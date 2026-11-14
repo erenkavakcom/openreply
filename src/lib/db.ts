@@ -26,6 +26,7 @@ const SCHEMA = [
     id SERIAL PRIMARY KEY,
     keywords TEXT NOT NULL,
     media_id VARCHAR(40) NOT NULL DEFAULT '',
+    media_url TEXT NOT NULL DEFAULT '',
     dm_text TEXT NOT NULL,
     reply_text TEXT NOT NULL DEFAULT '',
     active SMALLINT NOT NULL DEFAULT 1,
@@ -64,6 +65,8 @@ const SCHEMA = [
     at TIMESTAMPTZ NOT NULL DEFAULT now()
   )`,
   `CREATE INDEX IF NOT EXISTS login_attempts_ip ON login_attempts (ip, at)`,
+  // columns added after the first release; databases created before them get the column here
+  `ALTER TABLE ig_rules ADD COLUMN IF NOT EXISTS media_url TEXT NOT NULL DEFAULT ''`,
 ];
 
 function ensureSchema() {
